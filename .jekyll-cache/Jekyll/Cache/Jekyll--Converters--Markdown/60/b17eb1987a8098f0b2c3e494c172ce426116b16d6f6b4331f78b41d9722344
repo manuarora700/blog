@@ -1,0 +1,73 @@
+I"�"<p>While I was reading the draft of Dan Abramov’s Just Javascript, I stumbled upon the type of javascript <code class="highlighter-rouge">null</code>.</p>
+
+<p>Try this out on your javascript console
+<code class="highlighter-rouge">typeof null</code></p>
+
+<p>Turns out that null gets considered as an object rather than a primitive data type, which is – a bug. :(</p>
+
+<p>This is a bug in JavaScript. A bug that has a history attached to it. It is so intense that it cannot be fixed now because almost the entire internet will crash because of it. Funny!</p>
+
+<p>Now, According to the History</p>
+
+<blockquote>
+  <p>The “typeof null” bug is a remnant from the first version of JavaScript. In this version, values were stored in 32 bit units, which consisted of a small type tag (1–3 bits) and the actual data of the value. The type tags were stored in the lower bits of the units</p>
+</blockquote>
+
+<p>Strange. There’s more.
+This happens because of the following code</p>
+
+<div class="language-json highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="err">JS_PUBLIC_API(JSType)</span><span class="w">
+</span><span class="err">JS_TypeOfValue(JSContext</span><span class="w"> </span><span class="err">*cx,</span><span class="w"> </span><span class="err">jsval</span><span class="w"> </span><span class="err">v)</span><span class="w">
+</span><span class="p">{</span><span class="w">
+</span><span class="err">JSType</span><span class="w"> </span><span class="err">type</span><span class="w"> </span><span class="err">=</span><span class="w"> </span><span class="err">JSTYPE_VOID;</span><span class="w">
+</span><span class="err">JSObject</span><span class="w"> </span><span class="err">*obj;</span><span class="w">
+</span><span class="err">JSObjectOps</span><span class="w"> </span><span class="err">*ops;</span><span class="w">
+</span><span class="err">JSClass</span><span class="w"> </span><span class="err">*clasp;</span><span class="w">
+
+        </span><span class="err">CHECK_REQUEST(cx);</span><span class="w">
+        </span><span class="err">if</span><span class="w"> </span><span class="err">(JSVAL_IS_VOID(v))</span><span class="w"> </span><span class="p">{</span><span class="w">  </span><span class="err">//</span><span class="w"> </span><span class="err">(</span><span class="mi">1</span><span class="err">)</span><span class="w">
+            </span><span class="err">type</span><span class="w"> </span><span class="err">=</span><span class="w"> </span><span class="err">JSTYPE_VOID;</span><span class="w">
+        </span><span class="p">}</span><span class="w"> </span><span class="err">else</span><span class="w"> </span><span class="err">if</span><span class="w"> </span><span class="err">(JSVAL_IS_OBJECT(v))</span><span class="w"> </span><span class="p">{</span><span class="w">  </span><span class="err">//</span><span class="w"> </span><span class="err">(</span><span class="mi">2</span><span class="err">)</span><span class="w">
+            </span><span class="err">obj</span><span class="w"> </span><span class="err">=</span><span class="w"> </span><span class="err">JSVAL_TO_OBJECT(v);</span><span class="w">
+            </span><span class="err">if</span><span class="w"> </span><span class="err">(obj</span><span class="w"> </span><span class="err">&amp;&amp;</span><span class="w">
+                </span><span class="err">(ops</span><span class="w"> </span><span class="err">=</span><span class="w"> </span><span class="err">obj-&gt;map-&gt;ops</span><span class="p">,</span><span class="w">
+                 </span><span class="err">ops</span><span class="w"> </span><span class="err">==</span><span class="w"> </span><span class="err">&amp;js_ObjectOps</span><span class="w">
+                 </span><span class="err">?</span><span class="w"> </span><span class="err">(clasp</span><span class="w"> </span><span class="err">=</span><span class="w"> </span><span class="err">OBJ_GET_CLASS(cx</span><span class="p">,</span><span class="w"> </span><span class="err">obj)</span><span class="p">,</span><span class="w">
+                    </span><span class="err">clasp-&gt;call</span><span class="w"> </span><span class="err">||</span><span class="w"> </span><span class="err">clasp</span><span class="w"> </span><span class="err">==</span><span class="w"> </span><span class="err">&amp;js_FunctionClass)</span><span class="w"> </span><span class="err">//</span><span class="w"> </span><span class="err">(</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="err">)</span><span class="w">
+                 </span><span class="err">:</span><span class="w"> </span><span class="err">ops-&gt;call</span><span class="w"> </span><span class="err">!=</span><span class="w"> </span><span class="mi">0</span><span class="err">))</span><span class="w"> </span><span class="p">{</span><span class="w">  </span><span class="err">//</span><span class="w"> </span><span class="err">(</span><span class="mi">3</span><span class="err">)</span><span class="w">
+                </span><span class="err">type</span><span class="w"> </span><span class="err">=</span><span class="w"> </span><span class="err">JSTYPE_FUNCTION;</span><span class="w">
+            </span><span class="p">}</span><span class="w"> </span><span class="err">else</span><span class="w"> </span><span class="p">{</span><span class="w">
+                </span><span class="err">type</span><span class="w"> </span><span class="err">=</span><span class="w"> </span><span class="err">JSTYPE_OBJECT;</span><span class="w">
+            </span><span class="p">}</span><span class="w">
+        </span><span class="p">}</span><span class="w"> </span><span class="err">else</span><span class="w"> </span><span class="err">if</span><span class="w"> </span><span class="err">(JSVAL_IS_NUMBER(v))</span><span class="w"> </span><span class="p">{</span><span class="w">
+            </span><span class="err">type</span><span class="w"> </span><span class="err">=</span><span class="w"> </span><span class="err">JSTYPE_NUMBER;</span><span class="w">
+        </span><span class="p">}</span><span class="w"> </span><span class="err">else</span><span class="w"> </span><span class="err">if</span><span class="w"> </span><span class="err">(JSVAL_IS_STRING(v))</span><span class="w"> </span><span class="p">{</span><span class="w">
+            </span><span class="err">type</span><span class="w"> </span><span class="err">=</span><span class="w"> </span><span class="err">JSTYPE_STRING;</span><span class="w">
+        </span><span class="p">}</span><span class="w"> </span><span class="err">else</span><span class="w"> </span><span class="err">if</span><span class="w"> </span><span class="err">(JSVAL_IS_BOOLEAN(v))</span><span class="w"> </span><span class="p">{</span><span class="w">
+            </span><span class="err">type</span><span class="w"> </span><span class="err">=</span><span class="w"> </span><span class="err">JSTYPE_BOOLEAN;</span><span class="w">
+        </span><span class="p">}</span><span class="w">
+        </span><span class="err">return</span><span class="w"> </span><span class="err">type;</span><span class="w">
+    </span><span class="p">}</span><span class="w">
+
+</span></code></pre></div></div>
+
+<blockquote>
+  <p>Psst, While I was previewing the markdown of this code snippet, the browser crashed and it went into Infinite loop. 🤔</p>
+</blockquote>
+
+<p>The steps performed by the above code are:</p>
+
+<ul>
+  <li>At (1), the engine first checks whether the value v is undefined (VOID). This check is performed by comparing the value via equals:
+<code class="highlighter-rouge">#define JSVAL_IS_VOID(v) ((v) == JSVAL_VOID)</code></li>
+  <li>The next check (2) is whether the value has an object tag. If it additionally is either callable (3) or its internal property [[Class]] marks it as a function (4) then v is a function. Otherwise, it is an object. This is the result that is produced by typeof null.</li>
+  <li>The subsequent checks are for number, string and boolean. There is not even an explicit check for null, which could be performed by the following C macro.
+<code class="highlighter-rouge">#define JSVAL_IS_NULL(v) ((v) == JSVAL_NULL)</code></li>
+</ul>
+
+<h3 id="there-might-arise-one-question-is-typeof-also-a-bug-typeof-returns-an-object-which-is-correct-because-arrays-are-treated-as-objects-and-not-primitive-data-types">There might arise one question, is <code class="highlighter-rouge">typeof([])</code> also a bug? <code class="highlighter-rouge">typeof([])</code> returns an Object which is correct because arrays are treated as objects and not primitive data types.</h3>
+
+<p>Subscribe to Dan’s course if you’d like, I love it because it is reengineering my brain to perceieve the most out of Javascript.</p>
+
+<p><a href="https://justjavascript.com/">Just JavaScript</a></p>
+:ET
