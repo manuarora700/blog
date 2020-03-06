@@ -3,7 +3,7 @@ layout: post
 title: "One Funny thing about JavaScript NULL"
 subtitle: "It's not what you think it is"
 categories: Javascript
-background: "/img/posts/06.jpg"
+background: "/img/posts/06.jpg/"
 ---
 
 While I was reading the draft of Dan Abramov's Just Javascript, I stumbled upon the type of javascript `null`.
