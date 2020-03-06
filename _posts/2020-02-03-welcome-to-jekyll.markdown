@@ -1,7 +1,6 @@
 ---
 layout: post
 title: "Reference Post"
-date: 2020-03-03 14:26:33 +0530
 categories: jekyll update
 ---
 
